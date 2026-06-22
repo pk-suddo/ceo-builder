@@ -1,0 +1,17 @@
+{
+  "version": "0.0.1",
+  "configurations": [
+    {
+      "name": "tracker",
+      "runtimeExecutable": "python3",
+      "runtimeArgs": ["/Users/vincity/Claude/server.py"],
+      "port": 4200
+    },
+    {
+      "name": "calm-finance",
+      "runtimeExecutable": "npm",
+      "runtimeArgs": ["--prefix", "/Users/vincity/calm-finance", "run", "dev"],
+      "port": 3001
+    }
+  ]
+}
