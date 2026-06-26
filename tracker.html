@@ -186,16 +186,46 @@
 
   /* ── Learnings section (below tasks) ── */
   .learnings-section { margin-top:36px; }
-  .learnings-grid { display:grid; grid-template-columns:repeat(auto-fill,minmax(240px,1fr)); gap:10px; margin-top:12px; }
+  .learnings-grid { display:grid; grid-template-columns:repeat(3,1fr); gap:14px; margin-top:12px; }
+  @media(max-width:900px){ .learnings-grid { grid-template-columns:repeat(2,1fr); } }
+  @media(max-width:560px){ .learnings-grid { grid-template-columns:1fr; } }
+  @keyframes lCardIn { from{opacity:0;transform:translateY(18px) scale(.97)} to{opacity:1;transform:translateY(0) scale(1)} }
   .learning-card {
-    background:var(--bg2); border:1px solid var(--border); border-radius:10px; padding:13px 14px;
-    cursor:pointer; transition:all .18s; border-left:3px solid var(--card-color,var(--accent));
-    animation:cardEntrance .3s both;
+    background:color-mix(in srgb, var(--card-color,var(--accent)) 7%, var(--bg2));
+    border:1.5px solid color-mix(in srgb, var(--card-color,var(--accent)) 22%, var(--border));
+    border-radius:14px; padding:0; cursor:pointer;
+    transition:transform .18s ease, box-shadow .18s ease;
+    animation:lCardIn .35s ease both;
+    display:flex; flex-direction:column; overflow:hidden;
   }
-  .learning-card:hover { box-shadow:0 4px 16px rgba(0,0,0,.08); transform:translateY(-2px); border-color:var(--border2); }
-  .learning-card-task { font-size:12px; font-weight:650; color:var(--text); margin-bottom:5px; }
-  .learning-card-text { font-size:12px; color:var(--text2); line-height:1.6; font-style:italic; }
-  .learning-card-meta { font-size:10px; color:var(--text3); margin-top:6px; font-weight:600; letter-spacing:.04em; text-transform:uppercase; }
+  .learning-card:nth-child(1){animation-delay:.04s}
+  .learning-card:nth-child(2){animation-delay:.08s}
+  .learning-card:nth-child(3){animation-delay:.12s}
+  .learning-card:nth-child(4){animation-delay:.16s}
+  .learning-card:nth-child(5){animation-delay:.20s}
+  .learning-card:nth-child(6){animation-delay:.24s}
+  .learning-card:hover { transform:translateY(-3px) scale(1.01); box-shadow:0 8px 28px color-mix(in srgb, var(--card-color,var(--accent)) 20%, transparent); }
+  .lcard-header { background:color-mix(in srgb, var(--card-color,var(--accent)) 15%, var(--bg3)); padding:12px 14px 10px; border-bottom:1px solid color-mix(in srgb, var(--card-color,var(--accent)) 18%, var(--border)); }
+  .lcard-title { font-size:12.5px; font-weight:700; color:var(--text); line-height:1.4; }
+  .lcard-badge { display:inline-block; margin-top:5px; font-size:9px; font-weight:800; letter-spacing:.06em; text-transform:uppercase; color:var(--card-color,var(--accent)); background:color-mix(in srgb, var(--card-color,var(--accent)) 12%, transparent); border-radius:4px; padding:2px 6px; }
+  .lcard-body { padding:11px 14px 13px; flex:1; }
+  .lcard-text { font-size:12px; color:var(--text2); line-height:1.65; overflow:hidden; display:-webkit-box; -webkit-line-clamp:5; -webkit-box-orient:vertical; }
+  .lcard-footer { padding:8px 14px; border-top:1px solid color-mix(in srgb, var(--card-color,var(--accent)) 12%, var(--border)); display:flex; align-items:center; justify-content:space-between; }
+  .lcard-edit-btn { font-size:11px; font-weight:700; color:var(--card-color,var(--accent)); background:none; border:none; cursor:pointer; opacity:.75; transition:opacity .12s; padding:0; }
+  .lcard-edit-btn:hover { opacity:1; }
+
+  /* ── Rich text editor ── */
+  .rt-toolbar { display:flex; gap:6px; margin-bottom:10px; flex-wrap:wrap; }
+  .rt-btn { background:var(--bg3); border:1.5px solid var(--border2); border-radius:8px; padding:5px 12px; cursor:pointer; font-size:13px; color:var(--text); transition:all .12s; line-height:1.4; font-weight:600; }
+  .rt-btn:hover { background:var(--bg4); transform:translateY(-1px); }
+  .rt-btn.hl-btn { background:#fef9c3; border-color:#eab308; color:#713f12; }
+  .rt-btn.hl-btn:hover { background:#fef08a; }
+  .rt-editor { min-height:280px; max-height:440px; overflow-y:auto; border:1.5px solid var(--border2); border-radius:12px; padding:14px 16px; font-size:14px; line-height:1.9; color:var(--text); background:var(--bg); outline:none; cursor:text; transition:border-color .15s; }
+  .rt-editor:empty:before { content:attr(placeholder); color:var(--text3); pointer-events:none; }
+  .rt-editor:focus { border-color:var(--lm-color,var(--accent)); box-shadow:0 0 0 3px color-mix(in srgb, var(--lm-color,var(--accent)) 12%, transparent); }
+  .rt-editor b, .rt-editor strong { font-weight:700; }
+  .rt-editor u { text-decoration:underline; }
+  mark, .rt-editor mark { background:#fef08a; color:#713f12; border-radius:3px; padding:1px 3px; }
 
   /* ── Toast ── */
   .toast-wrap { position:fixed; bottom:24px; right:24px; z-index:9999; display:flex; flex-direction:column; gap:8px; }
@@ -377,41 +407,75 @@
 </div>
 
 <!-- Learning Edit Modal -->
+<!-- Edit Learning Modal -->
 <div class="modal-overlay" id="learningModal">
-  <div class="modal" style="max-width:480px;">
-    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:18px;">
-      <h2 style="font-size:15px;font-weight:700;">Edit Learning</h2>
-      <button class="btn-icon" onclick="closeModal('learningModal')">✕</button>
+  <div class="modal" style="max-width:600px;padding:0;overflow:hidden;border-radius:18px;">
+    <!-- Color banner header -->
+    <div id="lm-header" style="background:linear-gradient(135deg,var(--lm-color,var(--accent)),color-mix(in srgb,var(--lm-color,var(--accent)) 70%,#000));padding:20px 22px 18px;position:relative;">
+      <div style="display:flex;align-items:flex-start;justify-content:space-between;gap:12px;">
+        <div>
+          <div style="font-size:10px;font-weight:800;letter-spacing:.1em;text-transform:uppercase;color:rgba(255,255,255,.65);margin-bottom:5px;" id="lm-meta"></div>
+          <div id="lm-task" style="font-size:15px;font-weight:700;color:#fff;line-height:1.4;"></div>
+        </div>
+        <button onclick="closeModal('learningModal')" style="background:rgba(255,255,255,.2);border:none;border-radius:50%;width:30px;height:30px;cursor:pointer;color:#fff;font-size:14px;display:flex;align-items:center;justify-content:center;flex-shrink:0;transition:background .12s;" onmouseover="this.style.background='rgba(255,255,255,.35)'" onmouseout="this.style.background='rgba(255,255,255,.2)'">✕</button>
+      </div>
     </div>
-    <div id="lm-title" style="padding:10px 14px;background:var(--bg3);border-radius:8px;margin-bottom:18px;border-left:3px solid var(--accent);">
-      <div id="lm-task" style="font-size:13px;font-weight:650;color:var(--text);margin-bottom:3px;"></div>
-      <div id="lm-meta" style="font-size:11px;font-weight:600;letter-spacing:.04em;text-transform:uppercase;"></div>
-    </div>
-    <div style="margin-bottom:6px;" class="label">💡 What did you learn?</div>
-    <textarea id="lm-text" placeholder="Key insight, breakthrough, something to remember…&#10;&#10;Be specific — future you will thank you." style="min-height:130px;font-size:13.5px;line-height:1.7;"></textarea>
-    <div style="display:flex;gap:8px;margin-top:16px;justify-content:space-between;align-items:center;">
-      <button onclick="deleteLearning()" style="font-size:12px;color:var(--red);background:none;border:none;cursor:pointer;font-weight:500;opacity:.7;" onmouseover="this.style.opacity=1" onmouseout="this.style.opacity=.7">Remove learning</button>
-      <div style="display:flex;gap:8px;">
-        <button class="btn btn-ghost" onclick="closeModal('learningModal')">Cancel</button>
-        <button class="btn btn-primary" onclick="saveLearning()">Save Learning</button>
+    <!-- Editor body -->
+    <div style="padding:20px 22px 18px;">
+      <div style="display:flex;align-items:center;gap:8px;margin-bottom:10px;">
+        <span style="font-size:11px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--text3);">💡 What did you learn?</span>
+        <div style="flex:1;height:1px;background:var(--border);"></div>
+      </div>
+      <div class="rt-toolbar">
+        <button class="rt-btn" onclick="rtFmt('bold')" title="Bold"><b>B</b></button>
+        <button class="rt-btn" onclick="rtFmt('underline')" title="Underline"><u>U</u></button>
+        <button class="rt-btn" onclick="rtFmt('italic')" title="Italic"><i>I</i></button>
+        <button class="rt-btn hl-btn" onclick="rtHighlight()" title="Highlight">✦ Highlight</button>
+        <button class="rt-btn" onclick="rtFmt('insertUnorderedList')" title="Bullet list">• List</button>
+        <button class="rt-btn" onclick="rtFmt('removeFormat')" style="margin-left:auto;font-size:11px;font-weight:500;">✕ Clear</button>
+      </div>
+      <div id="lm-text" class="rt-editor" contenteditable="true" placeholder="Key insight, breakthrough, something to remember… Be specific — future you will thank you."></div>
+      <div style="display:flex;gap:8px;margin-top:16px;justify-content:space-between;align-items:center;">
+        <button onclick="deleteLearning()" style="font-size:12px;color:var(--red);background:none;border:none;cursor:pointer;font-weight:600;display:flex;align-items:center;gap:4px;opacity:.75;transition:opacity .12s;" onmouseover="this.style.opacity=1" onmouseout="this.style.opacity=.75">🗑 Remove</button>
+        <div style="display:flex;gap:8px;">
+          <button class="btn btn-ghost" onclick="closeModal('learningModal')">Cancel</button>
+          <button class="btn btn-primary" onclick="saveLearning()" id="lm-save-btn" style="background:var(--lm-color,var(--accent));border-color:var(--lm-color,var(--accent));">Save Learning</button>
+        </div>
       </div>
     </div>
   </div>
 </div>
 
-<!-- Add Learning Modal (task picker) -->
+<!-- Add Learning Modal (free-form, independent) -->
 <div class="modal-overlay" id="addLearningModal">
-  <div class="modal" style="max-width:480px;">
-    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:18px;">
+  <div class="modal" style="max-width:560px;">
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;">
       <h2 style="font-size:15px;font-weight:700;">+ Add Learning</h2>
       <button class="btn-icon" onclick="closeModal('addLearningModal')">✕</button>
     </div>
-    <div style="margin-bottom:14px;">
-      <div class="label" style="margin-bottom:6px;">Task</div>
-      <select id="lm-task-picker" style="font-size:12px;"></select>
+    <div style="display:flex;gap:10px;margin-bottom:14px;flex-wrap:wrap;">
+      <div style="flex:2;min-width:180px;">
+        <div class="label" style="margin-bottom:5px;">Title <span style="color:var(--text3);font-weight:400;">(optional)</span></div>
+        <input id="fn-title" type="text" placeholder="e.g. Key insight from today…" style="width:100%;padding:8px 10px;border-radius:7px;border:1.5px solid var(--border2);background:var(--bg);color:var(--text);font-size:13px;outline:none;" onfocus="this.style.borderColor='var(--accent)'" onblur="this.style.borderColor='var(--border2)'"/>
+      </div>
+      <div style="flex:1;min-width:120px;">
+        <div class="label" style="margin-bottom:5px;">Track <span style="color:var(--text3);font-weight:400;">(optional)</span></div>
+        <select id="fn-track" style="width:100%;padding:8px 10px;border-radius:7px;border:1.5px solid var(--border2);background:var(--bg);color:var(--text);font-size:13px;outline:none;">
+          <option value="">General</option>
+          <option value="ceo">CEO Role</option>
+          <option value="tech">Tech Architecture</option>
+        </select>
+      </div>
     </div>
-    <div style="margin-bottom:6px;" class="label">💡 What did you learn?</div>
-    <textarea id="lm-text-picker" placeholder="Key insight, breakthrough, something to remember…" style="min-height:120px;font-size:13.5px;line-height:1.7;"></textarea>
+    <div style="margin-bottom:8px;" class="label">💡 What did you learn?</div>
+    <div class="rt-toolbar">
+      <button class="rt-btn" onclick="rtFmt2('bold')" title="Bold"><b>B</b></button>
+      <button class="rt-btn" onclick="rtFmt2('underline')" title="Underline"><u>U</u></button>
+      <button class="rt-btn" onclick="rtFmt2('italic')" title="Italic"><i>I</i></button>
+      <button class="rt-btn" onclick="rtHighlight2()" title="Highlight" style="background:#fef08a;border-color:#eab308;">✦ Highlight</button>
+      <button class="rt-btn" onclick="rtFmt2('removeFormat')" style="margin-left:auto;font-size:11px;">Clear</button>
+    </div>
+    <div id="fn-text" class="rt-editor" contenteditable="true" placeholder="Write your insight here…"></div>
     <div style="display:flex;gap:8px;margin-top:16px;justify-content:flex-end;">
       <button class="btn btn-ghost" onclick="closeModal('addLearningModal')">Cancel</button>
       <button class="btn btn-primary" onclick="saveAddLearning()">Save Learning</button>
@@ -961,7 +1025,7 @@ function renderTaskCard(t){
       ${t.time?`<span style="font-size:11px;color:var(--text3);">⏱ ${t.time}h</span>`:''}
     </div>
     ${t.notes
-      ?`<div class="task-card-learning" onclick="openLearningModal('${t.id}')" style="cursor:pointer;" title="Click to edit learning">💡 ${escHtml(t.notes.length>90?t.notes.slice(0,88)+'…':t.notes)}</div>`
+      ?`<div class="task-card-learning" onclick="openLearningModal('${t.id}')" style="cursor:pointer;" title="Click to edit learning">💡 ${(()=>{const p=stripHtml(t.notes);return escHtml(p.length>90?p.slice(0,88)+'…':p);})()}</div>`
       :`<div onclick="openLearningModal('${t.id}')" style="font-size:11px;color:var(--text3);cursor:pointer;padding:4px 0;" onmouseover="this.style.color='${col}'" onmouseout="this.style.color='var(--text3)'">+ Add learning</div>`}
     <div style="display:flex;align-items:center;justify-content:space-between;">
       <span class="badge ${sbadge}" onclick="cycleStatus('${t.id}',event)" style="cursor:pointer;">
@@ -1011,6 +1075,15 @@ function navigateToPillar(track, pillar){
   },100);
 }
 
+// ── RICH TEXT HELPERS ─────────────────────────────────────
+function rtFmt(cmd){ document.getElementById('lm-text').focus(); document.execCommand(cmd,false,null); }
+function rtHighlight(){ document.getElementById('lm-text').focus(); document.execCommand('hiliteColor',false,'#fef08a'); }
+function rtFmt2(cmd){ document.getElementById('fn-text').focus(); document.execCommand(cmd,false,null); }
+function rtHighlight2(){ document.getElementById('fn-text').focus(); document.execCommand('hiliteColor',false,'#fef08a'); }
+
+// strip HTML tags for plain text preview
+function stripHtml(html){ const d=document.createElement('div');d.innerHTML=html;return d.textContent||d.innerText||''; }
+
 // ── LEARNING MODAL ────────────────────────────────────────
 let learningTaskId = null;
 function openLearningModal(id){
@@ -1018,120 +1091,198 @@ function openLearningModal(id){
   const task = [...state.ceoTasks,...state.techTasks].find(t=>t.id===id);
   if(!task) return;
   const col = pillarColor(task.pillar);
-  const modal = document.getElementById('learningModal');
   document.getElementById('lm-task').textContent = task.task;
   document.getElementById('lm-meta').textContent = (task.pillar||'') + (task.week?' · Week '+task.week:'') + ' · ' + (task.day||'');
-  document.getElementById('lm-meta').style.color = col;
-  document.getElementById('lm-text').value = task.notes||'';
-  document.getElementById('lm-title').style.borderLeft = `3px solid ${col}`;
-  modal.classList.add('open');
-  setTimeout(()=>document.getElementById('lm-text').focus(),200);
+  // set color banner
+  document.getElementById('learningModal').style.setProperty('--lm-color', col);
+  document.getElementById('lm-header').style.background = `linear-gradient(135deg,${col},color-mix(in srgb,${col} 60%,#000 40%))`;
+  const saveBtn = document.getElementById('lm-save-btn');
+  if(saveBtn){ saveBtn.style.background=col; saveBtn.style.borderColor=col; }
+  // set editor focus ring color
+  document.getElementById('lm-text').style.setProperty('--lm-color', col);
+  const editor = document.getElementById('lm-text');
+  const notes = task.notes||'';
+  editor.innerHTML = notes.startsWith('<') ? notes : escHtml(notes).replace(/\n/g,'<br>');
+  document.getElementById('learningModal').classList.add('open');
+  setTimeout(()=>editor.focus(),200);
 }
 function saveLearning(){
   const task = [...state.ceoTasks,...state.techTasks].find(t=>t.id===learningTaskId);
   if(!task) return;
-  task.notes = document.getElementById('lm-text').value.trim();
-  saveState();
-  closeModal('learningModal');
-  renderPage();
+  task.notes = document.getElementById('lm-text').innerHTML.trim();
+  saveState(); closeModal('learningModal'); renderPage();
   toast('💡 Learning saved','success');
 }
 function deleteLearning(){
   const task = [...state.ceoTasks,...state.techTasks].find(t=>t.id===learningTaskId);
   if(!task) return;
   task.notes = '';
-  saveState();
-  closeModal('learningModal');
-  renderPage();
+  saveState(); closeModal('learningModal'); renderPage();
   toast('Learning removed','info');
 }
 
-// ── ADD STANDALONE LEARNING (pick task) ──────────────────
+// ── FREE-FORM ADD LEARNING ────────────────────────────────
 function openAddLearning(){
-  const all = [...state.ceoTasks,...state.techTasks];
-  const sel = document.getElementById('lm-task-picker');
-  sel.innerHTML = all.map(t=>`<option value="${t.id}">[${t.pillar||'?'}] ${t.task.slice(0,60)}${t.task.length>60?'…':''}</option>`).join('');
-  // prefill first task
-  if(all.length){ document.getElementById('lm-text-picker').value = all[0].notes||''; }
-  sel.onchange = ()=>{
-    const t=all.find(x=>x.id===sel.value);
-    if(t) document.getElementById('lm-text-picker').value = t.notes||'';
-  };
+  document.getElementById('fn-title').value = '';
+  document.getElementById('fn-track').value = '';
+  document.getElementById('fn-text').innerHTML = '';
   document.getElementById('addLearningModal').classList.add('open');
-  setTimeout(()=>document.getElementById('lm-text-picker').focus(),200);
+  setTimeout(()=>document.getElementById('fn-title').focus(),200);
 }
 function saveAddLearning(){
-  const sel = document.getElementById('lm-task-picker');
-  const task = [...state.ceoTasks,...state.techTasks].find(t=>t.id===sel.value);
-  if(!task) return;
-  task.notes = document.getElementById('lm-text-picker').value.trim();
+  const title = document.getElementById('fn-title').value.trim();
+  const track = document.getElementById('fn-track').value;
+  const html  = document.getElementById('fn-text').innerHTML.trim();
+  if(!html || html==='<br>'){ toast('Write something first','error'); return; }
+  if(!state.freeNotes) state.freeNotes=[];
+  state.freeNotes.push({
+    id:'fn_'+Date.now()+'_'+Math.random().toString(36).slice(2),
+    title: title || 'Note',
+    track: track||'general',
+    notes: html,
+    createdAt: new Date().toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'})
+  });
   saveState(); closeModal('addLearningModal'); renderPage();
   toast('💡 Learning saved','success');
 }
+function openFreeNote(id){
+  const note = (state.freeNotes||[]).find(n=>n.id===id);
+  if(!note) return;
+  const col = {'ceo':'#8b5cf6','tech':'#3b82f6','general':'#5b6af5'}[note.track]||'#5b6af5';
+  document.getElementById('lm-task').textContent = note.title;
+  document.getElementById('lm-meta').textContent = note.track==='ceo'?'CEO Role':note.track==='tech'?'Tech Architecture':'General Note';
+  document.getElementById('lm-header').style.background = `linear-gradient(135deg,${col},color-mix(in srgb,${col} 60%,#000 40%))`;
+  const saveBtn = document.getElementById('lm-save-btn');
+  if(saveBtn){ saveBtn.style.background=col; saveBtn.style.borderColor=col; }
+  const editor = document.getElementById('lm-text');
+  editor.innerHTML = note.notes;
+  learningTaskId = '__free__'+id;
+  document.getElementById('learningModal').classList.add('open');
+  setTimeout(()=>editor.focus(),200);
+}
+// patch saveLearning / deleteLearning to handle free notes
+const _origSave = saveLearning;
+saveLearning = function(){
+  if(learningTaskId && learningTaskId.startsWith('__free__')){
+    const id = learningTaskId.replace('__free__','');
+    const note = (state.freeNotes||[]).find(n=>n.id===id);
+    if(note) note.notes = document.getElementById('lm-text').innerHTML.trim();
+    saveState(); closeModal('learningModal'); renderPage();
+    toast('💡 Learning saved','success');
+  } else { _origSave(); }
+};
+const _origDelete = deleteLearning;
+deleteLearning = function(){
+  if(learningTaskId && learningTaskId.startsWith('__free__')){
+    const id = learningTaskId.replace('__free__','');
+    state.freeNotes = (state.freeNotes||[]).filter(n=>n.id!==id);
+    saveState(); closeModal('learningModal'); renderPage();
+    toast('Note deleted','info');
+  } else { _origDelete(); }
+};
 
 // ── ALL LEARNINGS PAGE ────────────────────────────────────
 function renderAllLearnings(el){
   const ceoL=state.ceoTasks.filter(t=>t.notes&&t.notes.trim());
   const techL=state.techTasks.filter(t=>t.notes&&t.notes.trim());
-  const total=ceoL.length+techL.length;
+  const freeL=(state.freeNotes||[]);
+  const total=ceoL.length+techL.length+freeL.length;
+
+  const section=(label,items,isFree)=>{
+    if(!items.length) return '';
+    return`<div style="margin-bottom:32px;">
+      <div style="display:flex;align-items:center;gap:10px;margin-bottom:14px;">
+        <div class="label">${label}</div>
+        <div style="flex:1;height:1px;background:var(--border);"></div>
+        <span style="font-size:11px;color:var(--text3);">${items.length} note${items.length!==1?'s':''}</span>
+      </div>
+      <div class="learnings-grid">${items.map(t=>isFree?renderFreeNoteCard(t):renderLearningCard(t)).join('')}</div>
+    </div>`;
+  };
 
   el.innerHTML=`<div class="fade-in">
   <div style="display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:26px;gap:12px;flex-wrap:wrap;">
     <div>
       <h1 class="section-title">💡 Learning</h1>
-      <p class="section-sub">${total} insight${total!==1?'s':''} captured across both tracks</p>
+      <p class="section-sub">${total} insight${total!==1?'s':''} captured</p>
     </div>
     <button class="btn btn-primary" onclick="openAddLearning()">+ Add Learning</button>
   </div>
-
   ${total===0?`<div class="empty">
     <div class="empty-icon">💡</div>
     <div style="font-weight:600;margin-bottom:6px;">No learnings yet</div>
-    <div style="font-size:12px;margin-bottom:16px;">Open any task and capture what you learned</div>
+    <div style="font-size:12px;margin-bottom:16px;">Capture insights freely or from any task</div>
     <button class="btn btn-primary" onclick="openAddLearning()">+ Add your first learning</button>
   </div>`:`
-  <div style="margin-bottom:28px;">
-    <div style="display:flex;align-items:center;gap:10px;margin-bottom:14px;">
-      <div class="label">💼 CEO Role</div>
-      <div style="flex:1;height:1px;background:var(--border);"></div>
-      <span style="font-size:11px;color:var(--text3);">${ceoL.length} learning${ceoL.length!==1?'s':''}</span>
-    </div>
-    ${ceoL.length?`<div class="learnings-grid">${ceoL.map(t=>renderLearningCard(t)).join('')}</div>`:`<div style="color:var(--text3);font-size:13px;padding:8px 0 4px;">None yet — <button onclick="openAddLearning()" style="color:var(--accent);background:none;border:none;cursor:pointer;font-size:13px;font-weight:600;">add one →</button></div>`}
-  </div>
-  <div>
-    <div style="display:flex;align-items:center;gap:10px;margin-bottom:14px;">
-      <div class="label">⚙️ Tech Architecture</div>
-      <div style="flex:1;height:1px;background:var(--border);"></div>
-      <span style="font-size:11px;color:var(--text3);">${techL.length} learning${techL.length!==1?'s':''}</span>
-    </div>
-    ${techL.length?`<div class="learnings-grid">${techL.map(t=>renderLearningCard(t)).join('')}</div>`:`<div style="color:var(--text3);font-size:13px;padding:8px 0 4px;">None yet — <button onclick="openAddLearning()" style="color:var(--accent);background:none;border:none;cursor:pointer;font-size:13px;font-weight:600;">add one →</button></div>`}
-  </div>`}
+    ${section('📝 Notes',freeL,true)}
+    ${section('💼 CEO Role',ceoL,false)}
+    ${section('⚙️ Tech Architecture',techL,false)}
+  `}
   </div>`;
 }
 
 function renderLearningCard(t){
   const col=pillarColor(t.pillar);
+  const preview=stripHtml(t.notes);
   return`<div class="learning-card" style="--card-color:${col};" onclick="openLearningModal('${t.id}')">
-    <div style="display:flex;align-items:flex-start;justify-content:space-between;gap:8px;">
-      <div class="learning-card-task">${escHtml(t.task)}</div>
-      <button onclick="event.stopPropagation();openLearningModal('${t.id}')" style="flex-shrink:0;font-size:11px;color:${col};background:none;border:1px solid ${col}22;border-radius:5px;padding:2px 7px;cursor:pointer;font-weight:600;transition:all .12s;" onmouseover="this.style.background='${col}15'" onmouseout="this.style.background=''">Edit</button>
+    <div class="lcard-header">
+      <div class="lcard-title">${escHtml(t.task)}</div>
+      <span class="lcard-badge">${escHtml(t.pillar||'General')}</span>
     </div>
-    <div class="learning-card-text">"${escHtml(t.notes)}"</div>
-    <div class="learning-card-meta" style="color:${col};">${escHtml(t.pillar||'')} · ${t.status}</div>
+    <div class="lcard-body">
+      <div class="lcard-text">${escHtml(preview.slice(0,220))}</div>
+    </div>
+    <div class="lcard-footer">
+      <span style="font-size:10px;color:var(--text3);">${t.status}</span>
+      <button class="lcard-edit-btn" onclick="event.stopPropagation();openLearningModal('${t.id}')">Edit →</button>
+    </div>
+  </div>`;
+}
+function renderFreeNoteCard(n){
+  const col={'ceo':'#8b5cf6','tech':'#3b82f6','general':'#5b6af5'}[n.track]||'#5b6af5';
+  const trackLabel={'ceo':'CEO Role','tech':'Tech Arch','general':'General'}[n.track]||'General';
+  const preview=stripHtml(n.notes);
+  return`<div class="learning-card" style="--card-color:${col};" onclick="openFreeNote('${n.id}')">
+    <div class="lcard-header">
+      <div class="lcard-title">${escHtml(n.title)}</div>
+      <span class="lcard-badge">${trackLabel}</span>
+    </div>
+    <div class="lcard-body">
+      <div class="lcard-text">${escHtml(preview.slice(0,220))}</div>
+    </div>
+    <div class="lcard-footer">
+      <span style="font-size:10px;color:var(--text3);">${n.createdAt}</span>
+      <button class="lcard-edit-btn" onclick="event.stopPropagation();openFreeNote('${n.id}')">Edit →</button>
+    </div>
   </div>`;
 }
 
 // ── SIDEBAR LEARNINGS ─────────────────────────────────────
 function refreshSidebarLearnings(){
   const el=document.getElementById('sidebarLearnings');if(!el)return;
-  const all=[...state.ceoTasks,...state.techTasks].filter(t=>t.notes&&t.notes.trim()).slice(-5).reverse();
+  const taskNotes=[...state.ceoTasks,...state.techTasks].filter(t=>t.notes&&t.notes.trim());
+  const freeNotes=(state.freeNotes||[]);
+  const all=[...freeNotes.map(n=>({_free:true,...n})),...taskNotes].slice(-6).reverse();
   if(!all.length){el.innerHTML='';return;}
   el.innerHTML=`<div class="sidebar-learnings-title"><span>💡 Learnings</span><button class="btn-icon" onclick="navigate('learnings')" style="font-size:10px;color:var(--accent);font-weight:700;background:none;border:none;cursor:pointer;padding:0;">All →</button></div>
-  ${all.map(t=>{const col=pillarColor(t.pillar);return`<div class="sidebar-learning-card" onclick="openLearningModal('${t.id}')" style="border-left:2px solid ${col};">
-    <div class="sidebar-learning-task">${escHtml(t.task.length>36?t.task.slice(0,34)+'…':t.task)}</div>
-    <div class="sidebar-learning-text">${escHtml(t.notes.length>60?t.notes.slice(0,58)+'…':t.notes)}</div>
-    <div class="sidebar-learning-pill" style="color:${col};">${escHtml(t.pillar||'')}</div>
-  </div>`;}).join('')}`;
+  ${all.map(t=>{
+    if(t._free){
+      const col={'ceo':'#8b5cf6','tech':'#3b82f6','general':'#5b6af5'}[t.track]||'#5b6af5';
+      const preview=stripHtml(t.notes);
+      return`<div class="sidebar-learning-card" onclick="openFreeNote('${t.id}')" style="border-left:2px solid ${col};">
+        <div class="sidebar-learning-task">${escHtml(t.title.length>36?t.title.slice(0,34)+'…':t.title)}</div>
+        <div class="sidebar-learning-text">${escHtml(preview.length>60?preview.slice(0,58)+'…':preview)}</div>
+        <div class="sidebar-learning-pill" style="color:${col};">General Note</div>
+      </div>`;
+    }
+    const col=pillarColor(t.pillar);
+    const preview=stripHtml(t.notes);
+    return`<div class="sidebar-learning-card" onclick="openLearningModal('${t.id}')" style="border-left:2px solid ${col};">
+      <div class="sidebar-learning-task">${escHtml(t.task.length>36?t.task.slice(0,34)+'…':t.task)}</div>
+      <div class="sidebar-learning-text">${escHtml(preview.length>60?preview.slice(0,58)+'…':preview)}</div>
+      <div class="sidebar-learning-pill" style="color:${col};">${escHtml(t.pillar||'')}</div>
+    </div>`;
+  }).join('')}`;
 }
 
 // ── TODAY'S FOCUS ─────────────────────────────────────────
